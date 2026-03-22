@@ -1,7 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   MapPin,
   Phone,
@@ -9,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Invitation = {
   babyName: string;
@@ -24,6 +27,17 @@ type Invitation = {
   godparents: string[];
 };
 
+const babyPhotos = [
+  "/first.jpg",
+  "/second.jpg",
+  "/third.jpg",
+  "/fourth.jpg",
+  "/fifth.jpg",
+  "/sixth.jpg",
+  "/seventh.jpg",
+  "/eight.jpg",
+];
+
 export default function InvitationCard({
   invitation,
   onReplay,
@@ -32,11 +46,13 @@ export default function InvitationCard({
   onReplay: () => void;
 }) {
   const [musicOn, setMusicOn] = useState(false);
-  const [particlesOn, setParticlesOn] = useState(true);
+  const [particlesOn] = useState(true);
   const [countdown, setCountdown] = useState(
     getCountdown(invitation.eventDateISO),
   );
+  const [activePhoto, setActivePhoto] = useState(0);
   const audioEngineRef = useRef<{ stop: () => void } | null>(null);
+  const activePhotoSrc = useMemo(() => babyPhotos[activePhoto], [activePhoto]);
 
   useEffect(() => {
     const interval = window.setInterval(
@@ -45,6 +61,15 @@ export default function InvitationCard({
     );
     return () => window.clearInterval(interval);
   }, [invitation.eventDateISO]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActivePhoto((prev) => (prev + 1) % babyPhotos.length);
+    }, 3500);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   useEffect(
     () => () => {
       audioEngineRef.current?.stop();
@@ -65,6 +90,16 @@ export default function InvitationCard({
       audioEngineRef.current = engine;
       setMusicOn(true);
     }
+  };
+
+  const showPreviousPhoto = () => {
+    setActivePhoto((prev) =>
+      prev === 0 ? babyPhotos.length - 1 : prev - 1,
+    );
+  };
+
+  const showNextPhoto = () => {
+    setActivePhoto((prev) => (prev + 1) % babyPhotos.length);
   };
 
   const eventDate = new Date(invitation.eventDateISO);
@@ -100,20 +135,6 @@ export default function InvitationCard({
             </h1>
           </div>
           <div className="flex flex-wrap gap-3">
-            {/* <ControlButton
-              onClick={toggleMusic}
-              icon={musicOn ? <Pause size={16} /> : <Music4 size={16} />}
-            >
-              {musicOn ? "Pause Lullaby" : "Play Lullaby"}
-            </ControlButton>
-            <ControlButton
-              onClick={() => setParticlesOn((prev) => !prev)}
-              icon={
-                particlesOn ? <WindArrowDown size={16} /> : <Wind size={16} />
-              }
-            >
-              {particlesOn ? "Hide Particles" : "Show Particles"}
-            </ControlButton> */}
             <ControlButton onClick={onReplay} icon={<RotateCcw size={16} />}>
               Replay Intro
             </ControlButton>
@@ -197,14 +218,71 @@ export default function InvitationCard({
               love and protection. You are a precious blessing to us all.
             </div>
             <div className="rounded-[34px] border border-white/60 bg-[linear-gradient(180deg,#ffffff_0%,#eef8ff_100%)] p-6 shadow-luxe md:p-8">
-              <div className="aspect-[4/5] rounded-[28px] border border-dashed border-skyLine bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.98),rgba(226,242,255,0.95))] p-5">
-                <div className="flex h-full items-center justify-center rounded-[24px] border border-white/60 bg-white/55 text-center">
-                  <div>
-                    <p className="font-serif text-3xl text-ink">Baby Photo</p>
-                    <p className="mx-auto mt-3 max-w-xs text-sm leading-7 text-ink/65">
-                      Replace this block with your real image using Next.js
-                      Image for a polished keepsake-style photo frame.
-                    </p>
+              <div className="rounded-[28px] border border-dashed border-skyLine bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.98),rgba(226,242,255,0.95))] p-5">
+                <div className="relative overflow-hidden rounded-[24px] border border-white/60 bg-white/70 p-4 shadow-[0_18px_55px_rgba(120,160,210,0.2)]">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-serif text-3xl text-ink">Baby Photo</p>
+                      <p className="mt-1 text-sm leading-6 text-ink/65">
+                        A sweet gallery of Matthew Bryce&apos;s lovely moments.
+                      </p>
+                    </div>
+                    <div className="rounded-full border border-skyLine bg-white/85 px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-skyAccent/80">
+                      {activePhoto + 1} / {babyPhotos.length}
+                    </div>
+                  </div>
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-skyGlow/40">
+                    <motion.div
+                      key={activePhotoSrc}
+                      initial={{ opacity: 0, scale: 1.04 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.55, ease: "easeOut" }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={activePhotoSrc}
+                        alt={`${invitation.babyName} photo ${activePhoto + 1}`}
+                        fill
+                        priority={activePhoto === 0}
+                        sizes="(max-width: 1024px) 100vw, 40vw"
+                        className="object-cover"
+                      />
+                    </motion.div>
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#18344f]/35 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4">
+                      <button
+                        type="button"
+                        onClick={showPreviousPhoto}
+                        aria-label="Show previous baby photo"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/80 text-ink shadow-md backdrop-blur transition hover:-translate-y-0.5"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={showNextPhoto}
+                        aria-label="Show next baby photo"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/80 text-ink shadow-md backdrop-blur transition hover:-translate-y-0.5"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    {babyPhotos.map((photo, index) => (
+                      <button
+                        key={photo}
+                        type="button"
+                        onClick={() => setActivePhoto(index)}
+                        aria-label={`Show baby photo ${index + 1}`}
+                        aria-pressed={index === activePhoto}
+                        className={`h-2.5 rounded-full transition-all ${
+                          index === activePhoto
+                            ? "w-10 bg-skyAccent"
+                            : "w-2.5 bg-skyAccent/25 hover:bg-skyAccent/45"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -260,6 +338,7 @@ function InfoCard({
     </div>
   );
 }
+
 function ControlButton({
   children,
   icon,
@@ -279,6 +358,7 @@ function ControlButton({
     </button>
   );
 }
+
 function AmbientParticles() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -300,6 +380,7 @@ function AmbientParticles() {
     </div>
   );
 }
+
 function getCountdown(eventDateISO: string) {
   const target = new Date(eventDateISO).getTime();
   const now = Date.now();
@@ -315,6 +396,7 @@ function getCountdown(eventDateISO: string) {
     { label: "Seconds", value: String(seconds).padStart(2, "0") },
   ];
 }
+
 function startLullabyLoop() {
   try {
     const AudioCtx =
