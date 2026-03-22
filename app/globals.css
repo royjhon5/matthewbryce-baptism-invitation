@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh; font-family: Georgia, 'Times New Roman', serif; color: #35506c; background: #eef7ff; }
+button { font: inherit; }
+.clip-envelope-front { clip-path: polygon(0 18%, 50% 82%, 100% 18%, 100% 100%, 0 100%); }
+.clip-envelope-flap { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+@keyframes float-soft { 0% { transform: translateY(0px) scale(0.96); opacity: 0.3; } 50% { transform: translateY(-18px) scale(1.02); opacity: 0.92; } 100% { transform: translateY(0px) scale(0.96); opacity: 0.3; } }
+.animate-float-soft { animation-name: float-soft; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
