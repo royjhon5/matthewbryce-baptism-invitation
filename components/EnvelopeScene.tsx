@@ -103,7 +103,9 @@ export default function EnvelopeScene({
     playBellTone();
     const tl = gsap.timeline({
       defaults: { ease: "power3.inOut" },
-      onComplete: () => setTimeout(() => onComplete(), 650),
+      onComplete: () => {
+        window.setTimeout(() => onComplete(), 650);
+      },
     });
     tl.to(".seal-hint", { opacity: 0, y: -8, duration: 0.25 })
       .to(
